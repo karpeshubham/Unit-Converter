@@ -3,230 +3,1429 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Assignment Scheduler</title>
+  <title>College Management System</title>
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #1a73e8;
+      --primary-dark: #1558b0;
+      --accent: #fbbc04;
+      --danger: #ea4335;
+      --success: #34a853;
+      --warning: #ff9800;
+      --bg: #f0f4f8;
+      --card: #ffffff;
+      --text: #202124;
+      --muted: #5f6368;
+      --border: #dadce0;
+      --sidebar-bg: #1a1f36;
+      --sidebar-text: #c8d0e0;
+      --sidebar-active: #1a73e8;
+    }
+
     body {
-      background-color: black;
-      color: white;
-      font-family: "Courier New", Courier, monospace;
-      padding: 20px;
-    }
-
-    h1 {
-      text-align: center;
-      text-decoration: underline;
-    }
-
-    .input-section, .list-section {
-      max-width: 500px;
-      margin: 0 auto;
-      margin-bottom: 30px;
-    }
-
-    label {
-      display: block;
-      margin-top: 10px;
-      margin-bottom: 5px;
-    }
-
-    input, button {
-      font-family: "Courier New", Courier, monospace;
-      padding: 10px;
-      margin: 5px 0;
-      width: 100%;
-      background-color: white;
-      color: black;
-      border: 1px solid white;
-      box-sizing: border-box;
-    }
-
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    li {
-      margin: 10px 0;
-      background-color: white;
-      color: black;
-      padding: 10px;
-      border-left: 5px solid black;
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
       align-items: center;
+      justify-content: space-between;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      box-shadow: 0 2px 6px rgba(0,0,0,.25);
     }
+    header .logo { font-size: 1.25rem; font-weight: 700; letter-spacing: .5px; }
+    header .logo span { color: var(--accent); }
+    header .header-right { font-size: .85rem; opacity: .9; }
 
-    .remove-btn {
-      background-color: black;
-      color: white;
-      border: 1px solid white;
+    /* ── LAYOUT ── */
+    .layout { display: flex; margin-top: 60px; min-height: calc(100vh - 60px); }
+
+    /* ── SIDEBAR ── */
+    nav.sidebar {
+      width: 220px;
+      background: var(--sidebar-bg);
+      color: var(--sidebar-text);
+      padding: 20px 0;
+      position: fixed;
+      top: 60px; left: 0; bottom: 0;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+    nav.sidebar .nav-section { padding: 6px 16px 4px; font-size: .7rem; text-transform: uppercase; letter-spacing: 1px; opacity: .5; margin-top: 12px; }
+    nav.sidebar .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 20px;
       cursor: pointer;
-      padding: 5px 10px;
-      margin-left: 5px;
+      border-left: 3px solid transparent;
+      transition: background .15s, border-color .15s;
+      font-size: .93rem;
+    }
+    nav.sidebar .nav-item:hover { background: rgba(255,255,255,.07); }
+    nav.sidebar .nav-item.active { background: rgba(26,115,232,.2); border-left-color: var(--sidebar-active); color: #fff; }
+    nav.sidebar .nav-item .icon { font-size: 1.1rem; width: 20px; text-align: center; }
+
+    /* ── MAIN ── */
+    main {
+      margin-left: 220px;
+      padding: 28px 28px 40px;
+      flex: 1;
     }
 
-    .remove-btn:hover {
-      background-color: white;
-      color: black;
+    /* ── DASHBOARD CARDS ── */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 18px;
+      margin-bottom: 28px;
     }
+    .stat-card {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      cursor: pointer;
+      transition: box-shadow .2s, transform .15s;
+      border: 1px solid var(--border);
+    }
+    .stat-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,.12); transform: translateY(-2px); }
+    .stat-card .stat-icon { font-size: 2rem; width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .stat-card .stat-info .stat-num { font-size: 1.5rem; font-weight: 700; }
+    .stat-card .stat-info .stat-label { font-size: .8rem; color: var(--muted); margin-top: 2px; }
+
+    /* ── SECTION HEADER ── */
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .section-header h2 { font-size: 1.35rem; font-weight: 600; }
+
+    /* ── PAGE ── */
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 22px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      border: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+    .card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 14px; color: var(--primary); }
+
+    /* ── FORM ── */
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-bottom: 14px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-group label { font-size: .82rem; font-weight: 600; color: var(--muted); }
+    .form-group input, .form-group select, .form-group textarea {
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: .9rem;
+      outline: none;
+      transition: border-color .2s;
+      background: #fff;
+      font-family: inherit;
+    }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); }
+
+    /* ── BUTTONS ── */
+    .btn {
+      padding: 9px 18px;
+      border: none;
+      border-radius: 6px;
+      font-size: .88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .15s, transform .1s;
+      font-family: inherit;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn:active { transform: scale(.97); }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-warning { background: var(--warning); color: #fff; }
+    .btn-secondary { background: var(--border); color: var(--text); }
+    .btn-sm { padding: 5px 11px; font-size: .78rem; }
+
+    /* ── TABLE ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    thead th { background: #f8f9fa; padding: 10px 12px; text-align: left; font-size: .78rem; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); border-bottom: 2px solid var(--border); white-space: nowrap; }
+    tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: #f8f9fa; }
+
+    /* ── BADGES ── */
+    .badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 12px;
+      font-size: .73rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+    .badge-success { background: #e6f4ea; color: #137333; }
+    .badge-danger  { background: #fce8e6; color: #c5221f; }
+    .badge-warning { background: #fef7e0; color: #b06000; }
+    .badge-info    { background: #e8f0fe; color: #1a73e8; }
+    .badge-muted   { background: #f1f3f4; color: var(--muted); }
+
+    /* ── ATTENDANCE ── */
+    .att-date-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+    .att-table td .att-btns { display: flex; gap: 5px; }
+    .att-bar { display: flex; height: 8px; border-radius: 4px; background: var(--border); overflow: hidden; }
+    .att-bar .att-fill { background: var(--success); transition: width .4s; }
+    .att-bar .att-fill.warn { background: var(--warning); }
+    .att-bar .att-fill.low  { background: var(--danger); }
+    .att-pct { font-size: .78rem; margin-top: 3px; font-weight: 600; }
+
+    /* ── TIMETABLE ── */
+    .tt-grid { display: grid; grid-template-columns: 80px repeat(6, 1fr); gap: 2px; font-size: .82rem; }
+    .tt-head { background: var(--primary); color: #fff; padding: 8px 6px; text-align: center; font-weight: 600; border-radius: 4px; }
+    .tt-time { background: #f1f3f4; padding: 8px 6px; text-align: center; font-weight: 600; color: var(--muted); border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+    .tt-cell {
+      min-height: 64px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      padding: 6px 8px;
+      cursor: pointer;
+      transition: background .15s;
+      border: 1px solid var(--border);
+      position: relative;
+    }
+    .tt-cell:hover { background: #e8f0fe; }
+    .tt-cell.filled { background: var(--primary); color: #fff; border-color: var(--primary-dark); }
+    .tt-cell.filled:hover { background: var(--primary-dark); }
+    .tt-cell .tt-subj { font-weight: 600; font-size: .83rem; }
+    .tt-cell .tt-teacher { font-size: .73rem; opacity: .85; margin-top: 2px; }
+    .tt-cell .tt-room { font-size: .7rem; opacity: .75; }
+    .tt-cell .tt-del { position: absolute; top: 4px; right: 5px; font-size: .7rem; cursor: pointer; opacity: .7; }
+    .tt-cell .tt-del:hover { opacity: 1; }
+
+    /* ── RESULTS ── */
+    .grade-A  { color: #137333; font-weight: 700; }
+    .grade-B  { color: #1a73e8; font-weight: 700; }
+    .grade-C  { color: #b06000; font-weight: 700; }
+    .grade-F  { color: #c5221f; font-weight: 700; }
+
+    /* ── NOTICES ── */
+    .notice-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+      background: var(--card);
+      position: relative;
+    }
+    .notice-card .notice-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+    .notice-card .notice-title { font-weight: 600; font-size: .97rem; }
+    .notice-card .notice-body { font-size: .87rem; color: var(--muted); line-height: 1.55; }
+    .notice-card .notice-del { position: absolute; top: 12px; right: 14px; cursor: pointer; color: var(--danger); font-size: .8rem; }
+    .notice-card .notice-del:hover { text-decoration: underline; }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      bottom: 28px; right: 28px;
+      background: #323232;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: .88rem;
+      z-index: 9999;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity .25s, transform .25s;
+      pointer-events: none;
+    }
+    #toast.show { opacity: 1; transform: translateY(0); }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 200;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: 12px;
+      padding: 28px;
+      width: 90%;
+      max-width: 480px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.18);
+    }
+    .modal h3 { margin-bottom: 18px; font-size: 1.1rem; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav.sidebar { transform: translateX(-100%); transition: transform .25s; z-index: 99; }
+      nav.sidebar.open { transform: translateX(0); }
+      main { margin-left: 0; padding: 16px; }
+      header .menu-btn { display: block; }
+      .tt-grid { grid-template-columns: 60px repeat(6, minmax(80px,1fr)); }
+    }
+    header .menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 1.4rem;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+    .overlay-close {
+      display: none;
+      position: fixed; inset: 0;
+      z-index: 98;
+      background: transparent;
+    }
+    @media (max-width: 768px) {
+      .overlay-close { display: block; }
+    }
+
+    /* ── PROGRESS BAR ── */
+    .progress-wrap { background: var(--border); border-radius: 99px; height: 10px; overflow: hidden; }
+    .progress-bar { height: 100%; border-radius: 99px; transition: width .4s; }
+
+    /* ── PAYMENT SUMMARY ── */
+    .pay-summary { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+    .pay-sum-item { flex: 1; min-width: 140px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+    .pay-sum-item .psi-label { font-size: .78rem; color: var(--muted); }
+    .pay-sum-item .psi-val { font-size: 1.35rem; font-weight: 700; margin-top: 4px; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+    .empty-state .es-icon { font-size: 2.5rem; margin-bottom: 10px; }
+    .empty-state p { font-size: .9rem; }
   </style>
 </head>
 <body>
 
-  <h1>Assignment Scheduler</h1>
+<!-- TOAST -->
+<div id="toast"></div>
 
-  <div class="input-section">
-    <label for="title">Assignment Title:</label>
-    <input type="text" id="title" placeholder="Enter assignment title">
-
-    <label for="date">Due Date:</label>
-    <input type="date" id="date">
-
-    <label for="time">Due Time:</label>
-    <input type="time" id="time">
-
-    <button onclick="addAssignment()">Add Assignment</button>
+<!-- MODAL: Timetable cell -->
+<div class="modal-overlay" id="ttModal">
+  <div class="modal">
+    <h3>📅 Edit Timetable Slot</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Subject</label>
+        <input type="text" id="tt-subj" placeholder="e.g. Mathematics">
+      </div>
+      <div class="form-group">
+        <label>Teacher</label>
+        <input type="text" id="tt-teacher" placeholder="e.g. Mr. Sharma">
+      </div>
+      <div class="form-group">
+        <label>Room / Lab</label>
+        <input type="text" id="tt-room" placeholder="e.g. Room 201">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeTTModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveTTSlot()">Save</button>
+    </div>
   </div>
+</div>
 
-  <div class="list-section">
-    <h2>Upcoming Assignments</h2>
-    <ul id="assignmentList"></ul>
+<!-- HEADER -->
+<header>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menu">☰</button>
+    <div class="logo">🎓 <span>EduManage</span> College Portal</div>
   </div>
+  <div class="header-right" id="headerDate"></div>
+</header>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      requestNotificationPermission();
-      loadAssignments();
-      checkNotifications();
-      setInterval(checkLastHourNotifications, 600000); // every 10 min
-      setInterval(checkNotifications, 3600000); // every 1 hour
-    });
+<div class="layout">
+  <!-- SIDEBAR -->
+  <nav class="sidebar" id="sidebar">
+    <div class="nav-section">Overview</div>
+    <div class="nav-item active" onclick="showPage('dashboard')" id="nav-dashboard">
+      <span class="icon">🏠</span> Dashboard
+    </div>
 
-    function addAssignment() {
-      const title = document.getElementById('title').value.trim();
-      const date = document.getElementById('date').value;
-      const time = document.getElementById('time').value;
+    <div class="nav-section">Academics</div>
+    <div class="nav-item" onclick="showPage('attendance')" id="nav-attendance">
+      <span class="icon">✅</span> Attendance
+    </div>
+    <div class="nav-item" onclick="showPage('timetable')" id="nav-timetable">
+      <span class="icon">🗓️</span> Timetable
+    </div>
+    <div class="nav-item" onclick="showPage('results')" id="nav-results">
+      <span class="icon">📊</span> Results
+    </div>
 
-      if (!title || !date || !time) {
-        alert('Please fill in all fields.');
-        return;
-      }
+    <div class="nav-section">Administration</div>
+    <div class="nav-item" onclick="showPage('payment')" id="nav-payment">
+      <span class="icon">💳</span> Payments
+    </div>
+    <div class="nav-item" onclick="showPage('notices')" id="nav-notices">
+      <span class="icon">📢</span> Notices
+    </div>
+  </nav>
+  <div class="overlay-close" id="overlayClose" onclick="closeSidebar()"></div>
 
-      const assignments = JSON.parse(localStorage.getItem('assignments') || '[]');
-      assignments.push({ title, date, time });
-      localStorage.setItem('assignments', JSON.stringify(assignments));
-      loadAssignments();
+  <!-- MAIN CONTENT -->
+  <main>
 
-      document.getElementById('title').value = '';
-      document.getElementById('date').value = '';
-      document.getElementById('time').value = '';
-    }
-
-    function loadAssignments() {
-      const list = document.getElementById('assignmentList');
-      list.innerHTML = '';
-      const assignments = JSON.parse(localStorage.getItem('assignments') || '[]');
-
-      assignments.forEach((item, index) => {
-        const time12 = formatTo12Hour(item.time);
-        const li = document.createElement('li');
-        li.innerHTML = `
-          <span>${item.title} - Due: ${item.date} ${time12}</span>
-          <div>
-            <button class="remove-btn" onclick="removeAssignment(${index})">Done</button>
-            <button class="remove-btn" onclick="addToCalendar('${item.title}', '${item.date}', '${item.time}')">🗓</button>
+    <!-- ══════════════════════════════════════════ DASHBOARD ══ -->
+    <div class="page active" id="page-dashboard">
+      <div class="section-header">
+        <h2>Dashboard</h2>
+        <span style="font-size:.85rem;color:var(--muted)" id="dashGreet"></span>
+      </div>
+      <div class="dashboard-grid">
+        <div class="stat-card" onclick="showPage('attendance')">
+          <div class="stat-icon" style="background:#e6f4ea">✅</div>
+          <div class="stat-info">
+            <div class="stat-num" id="dash-students">0</div>
+            <div class="stat-label">Students</div>
           </div>
-        `;
-        list.appendChild(li);
-      });
-    }
+        </div>
+        <div class="stat-card" onclick="showPage('attendance')">
+          <div class="stat-icon" style="background:#e8f0fe">📅</div>
+          <div class="stat-info">
+            <div class="stat-num" id="dash-att-pct">—</div>
+            <div class="stat-label">Avg Attendance</div>
+          </div>
+        </div>
+        <div class="stat-card" onclick="showPage('payment')">
+          <div class="stat-icon" style="background:#fef7e0">💳</div>
+          <div class="stat-info">
+            <div class="stat-num" id="dash-pending">0</div>
+            <div class="stat-label">Pending Fees</div>
+          </div>
+        </div>
+        <div class="stat-card" onclick="showPage('notices')">
+          <div class="stat-icon" style="background:#fce8e6">📢</div>
+          <div class="stat-info">
+            <div class="stat-num" id="dash-notices">0</div>
+            <div class="stat-label">Active Notices</div>
+          </div>
+        </div>
+        <div class="stat-card" onclick="showPage('results')">
+          <div class="stat-icon" style="background:#f3e8fd">📊</div>
+          <div class="stat-info">
+            <div class="stat-num" id="dash-results">0</div>
+            <div class="stat-label">Results Entered</div>
+          </div>
+        </div>
+      </div>
 
-    function formatTo12Hour(timeStr) {
-      const [hour, minute] = timeStr.split(':');
-      let h = parseInt(hour);
-      const ampm = h >= 12 ? 'PM' : 'AM';
-      h = h % 12 || 12;
-      return ${h}:${minute} ${ampm};
-    }
+      <!-- Recent Notices Preview -->
+      <div class="card">
+        <h3>📢 Latest Notices</h3>
+        <div id="dash-notice-list">
+          <div class="empty-state"><div class="es-icon">📋</div><p>No notices yet.</p></div>
+        </div>
+      </div>
 
-    function removeAssignment(index) {
-      const assignments = JSON.parse(localStorage.getItem('assignments') || '[]');
-      assignments.splice(index, 1);
-      localStorage.setItem('assignments', JSON.stringify(assignments));
-      loadAssignments();
-    }
+      <!-- Quick links -->
+      <div class="card">
+        <h3>⚡ Quick Actions</h3>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">
+          <button class="btn btn-primary" onclick="showPage('attendance')">Mark Attendance</button>
+          <button class="btn btn-success" onclick="showPage('payment')">Record Payment</button>
+          <button class="btn btn-warning" onclick="showPage('notices')">Post Notice</button>
+          <button class="btn btn-secondary" onclick="showPage('results')">Enter Results</button>
+        </div>
+      </div>
+    </div>
 
-    function requestNotificationPermission() {
-      if ('Notification' in window && Notification.permission !== 'granted') {
-        Notification.requestPermission().then(permission => {
-          if (permission === 'granted') {
-            console.log("Notifications allowed");
-          }
-        });
+    <!-- ══════════════════════════════════════════ ATTENDANCE ══ -->
+    <div class="page" id="page-attendance">
+      <div class="section-header">
+        <h2>✅ Attendance Management</h2>
+      </div>
+
+      <!-- Add student -->
+      <div class="card">
+        <h3>Add Student</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Student Name</label>
+            <input type="text" id="att-name" placeholder="Full name">
+          </div>
+          <div class="form-group">
+            <label>Roll Number</label>
+            <input type="text" id="att-roll" placeholder="e.g. CS2024-01">
+          </div>
+          <div class="form-group">
+            <label>Class / Semester</label>
+            <input type="text" id="att-class" placeholder="e.g. FY BSc CS">
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="addStudent()">➕ Add Student</button>
+      </div>
+
+      <!-- Mark attendance -->
+      <div class="card">
+        <h3>Mark Attendance</h3>
+        <div class="att-date-row">
+          <div class="form-group" style="flex:0 0 auto">
+            <label>Date</label>
+            <input type="date" id="att-date">
+          </div>
+          <div class="form-group" style="flex:0 0 auto">
+            <label>Subject / Period</label>
+            <input type="text" id="att-subject" placeholder="e.g. Mathematics">
+          </div>
+          <div style="align-self:flex-end;display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-success btn-sm" onclick="markAll('P')">✅ All Present</button>
+            <button class="btn btn-danger btn-sm"  onclick="markAll('A')">❌ All Absent</button>
+            <button class="btn btn-primary" onclick="saveAttendance()">💾 Save</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Roll No.</th>
+                <th>Student Name</th>
+                <th>Class</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="att-mark-body">
+              <tr><td colspan="5" class="empty-state"><p>Add students first.</p></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="card">
+        <h3>Attendance Summary</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Roll No.</th>
+                <th>Student Name</th>
+                <th>Class</th>
+                <th>Present</th>
+                <th>Total</th>
+                <th>Attendance %</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="att-summary-body">
+              <tr><td colspan="7" class="empty-state"><p>No data yet.</p></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════ TIMETABLE ══ -->
+    <div class="page" id="page-timetable">
+      <div class="section-header">
+        <h2>🗓️ Timetable</h2>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="form-group" style="flex:0 0 auto;margin:0">
+            <select id="tt-class-sel" onchange="renderTimetable()">
+              <option value="">— Select Class —</option>
+            </select>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="addTTClass()">+ New Class</button>
+        </div>
+      </div>
+
+      <div class="card" id="tt-card">
+        <div class="empty-state"><div class="es-icon">🗓️</div><p>Select or create a class to view timetable.</p></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════ RESULTS ══ -->
+    <div class="page" id="page-results">
+      <div class="section-header">
+        <h2>📊 Results Management</h2>
+      </div>
+
+      <!-- Enter result -->
+      <div class="card">
+        <h3>Enter / Update Result</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Student Roll No.</label>
+            <input type="text" id="res-roll" placeholder="e.g. CS2024-01">
+          </div>
+          <div class="form-group">
+            <label>Student Name</label>
+            <input type="text" id="res-name" placeholder="Full name">
+          </div>
+          <div class="form-group">
+            <label>Subject</label>
+            <input type="text" id="res-subj" placeholder="e.g. Mathematics">
+          </div>
+          <div class="form-group">
+            <label>Exam Type</label>
+            <select id="res-exam">
+              <option>Mid-Term</option>
+              <option>Final</option>
+              <option>Unit Test</option>
+              <option>Practical</option>
+              <option>Assignment</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Marks Obtained</label>
+            <input type="number" id="res-marks" min="0" placeholder="e.g. 78">
+          </div>
+          <div class="form-group">
+            <label>Total Marks</label>
+            <input type="number" id="res-total" min="1" placeholder="e.g. 100">
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="addResult()">➕ Save Result</button>
+      </div>
+
+      <!-- Filter -->
+      <div class="card">
+        <h3>View Results</h3>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+          <div class="form-group" style="flex:1;min-width:160px">
+            <label>Filter by Roll No.</label>
+            <input type="text" id="res-filter-roll" placeholder="Roll No." oninput="renderResults()">
+          </div>
+          <div class="form-group" style="flex:1;min-width:160px">
+            <label>Filter by Subject</label>
+            <input type="text" id="res-filter-subj" placeholder="Subject" oninput="renderResults()">
+          </div>
+          <div class="form-group" style="flex:0 0 auto;align-self:flex-end">
+            <button class="btn btn-secondary" onclick="clearResFilters()">Clear</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Roll No.</th>
+                <th>Student</th>
+                <th>Subject</th>
+                <th>Exam</th>
+                <th>Marks</th>
+                <th>Total</th>
+                <th>%</th>
+                <th>Grade</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="results-body">
+              <tr><td colspan="10" class="empty-state"><p>No results entered yet.</p></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════ PAYMENT ══ -->
+    <div class="page" id="page-payment">
+      <div class="section-header">
+        <h2>💳 Payment Management</h2>
+      </div>
+
+      <!-- Add record -->
+      <div class="card">
+        <h3>Add Fee Record</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Student Name</label>
+            <input type="text" id="pay-name" placeholder="Full name">
+          </div>
+          <div class="form-group">
+            <label>Roll Number</label>
+            <input type="text" id="pay-roll" placeholder="e.g. CS2024-01">
+          </div>
+          <div class="form-group">
+            <label>Fee Type</label>
+            <select id="pay-type">
+              <option>Tuition Fee</option>
+              <option>Hostel Fee</option>
+              <option>Library Fee</option>
+              <option>Exam Fee</option>
+              <option>Transport Fee</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Amount (₹)</label>
+            <input type="number" id="pay-amount" min="0" placeholder="e.g. 15000">
+          </div>
+          <div class="form-group">
+            <label>Due Date</label>
+            <input type="date" id="pay-due">
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="pay-status">
+              <option value="Pending">Pending</option>
+              <option value="Paid">Paid</option>
+              <option value="Partial">Partial</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="addPayment()">➕ Add Record</button>
+      </div>
+
+      <!-- Summary -->
+      <div class="pay-summary" id="pay-summary-row"></div>
+
+      <!-- Records -->
+      <div class="card">
+        <h3>Fee Records</h3>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+          <div class="form-group" style="flex:1;min-width:140px">
+            <label>Filter by Name / Roll</label>
+            <input type="text" id="pay-filter" placeholder="Search…" oninput="renderPayments()">
+          </div>
+          <div class="form-group" style="flex:0 0 auto;min-width:140px">
+            <label>Filter by Status</label>
+            <select id="pay-filter-status" onchange="renderPayments()">
+              <option value="">All</option>
+              <option value="Pending">Pending</option>
+              <option value="Paid">Paid</option>
+              <option value="Partial">Partial</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Roll No.</th>
+                <th>Student</th>
+                <th>Fee Type</th>
+                <th>Amount (₹)</th>
+                <th>Due Date</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="payment-body">
+              <tr><td colspan="8" class="empty-state"><p>No fee records yet.</p></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════ NOTICES ══ -->
+    <div class="page" id="page-notices">
+      <div class="section-header">
+        <h2>📢 Notice Board</h2>
+      </div>
+
+      <!-- Post notice -->
+      <div class="card">
+        <h3>Post New Notice</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Title</label>
+            <input type="text" id="notice-title" placeholder="Notice heading">
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select id="notice-cat">
+              <option>General</option>
+              <option>Exam</option>
+              <option>Event</option>
+              <option>Holiday</option>
+              <option>Fee</option>
+              <option>Result</option>
+              <option>Urgent</option>
+            </select>
+          </div>
+          <div class="form-group" style="grid-column:1/-1">
+            <label>Notice Content</label>
+            <textarea id="notice-body" placeholder="Write notice details here…"></textarea>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="addNotice()">📢 Post Notice</button>
+      </div>
+
+      <!-- Filter -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:flex-end">
+        <div class="form-group" style="flex:1;min-width:160px">
+          <label>Search</label>
+          <input type="text" id="notice-search" placeholder="Search notices…" oninput="renderNotices()">
+        </div>
+        <div class="form-group" style="flex:0 0 auto;min-width:130px">
+          <label>Category</label>
+          <select id="notice-filter-cat" onchange="renderNotices()">
+            <option value="">All</option>
+            <option>General</option>
+            <option>Exam</option>
+            <option>Event</option>
+            <option>Holiday</option>
+            <option>Fee</option>
+            <option>Result</option>
+            <option>Urgent</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="notices-list">
+        <div class="empty-state"><div class="es-icon">📋</div><p>No notices posted yet.</p></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ══════════════════════════ UTILITIES ══════════════════════════
+function saveData(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+function loadData(key, def) {
+  try { return JSON.parse(localStorage.getItem(key)) || def; }
+  catch(e) { return def; }
+}
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#039;');
+}
+function today() {
+  return new Date().toISOString().split('T')[0];
+}
+
+// ══════════════════════════ NAVIGATION ══════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.getElementById('nav-' + id).classList.add('active');
+  closeSidebar();
+  if (id === 'attendance') { initAttDate(); renderAttMark(); renderAttSummary(); }
+  if (id === 'timetable')  { renderTTClassSel(); renderTimetable(); }
+  if (id === 'results')    { renderResults(); }
+  if (id === 'payment')    { renderPayments(); renderPaySummary(); }
+  if (id === 'notices')    { renderNotices(); }
+  if (id === 'dashboard')  { renderDashboard(); }
+}
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+// ══════════════════════════ DASHBOARD ══════════════════════════
+function renderDashboard() {
+  const students = loadData('students', []);
+  const payments = loadData('payments', []);
+  const notices  = loadData('notices',  []);
+  const results  = loadData('results',  []);
+  const attRecs  = loadData('attendance-records', []);
+
+  document.getElementById('dash-students').textContent = students.length;
+  document.getElementById('dash-pending').textContent =
+    payments.filter(p => p.status === 'Pending').length;
+  document.getElementById('dash-notices').textContent = notices.length;
+  document.getElementById('dash-results').textContent = results.length;
+
+  // Average attendance
+  if (students.length && attRecs.length) {
+    let total = 0;
+    students.forEach(s => {
+      const recs = attRecs.filter(r => r.roll === s.roll);
+      const pct  = recs.length ? (recs.filter(r => r.status === 'P').length / recs.length) * 100 : 0;
+      total += pct;
+    });
+    document.getElementById('dash-att-pct').textContent =
+      (total / students.length).toFixed(1) + '%';
+  } else {
+    document.getElementById('dash-att-pct').textContent = '—';
+  }
+
+  // Latest notices
+  const nl = document.getElementById('dash-notice-list');
+  if (!notices.length) {
+    nl.innerHTML = '<div class="empty-state"><div class="es-icon">📋</div><p>No notices yet.</p></div>';
+  } else {
+    nl.innerHTML = notices.slice(0, 3).map(n => `
+      <div style="border-bottom:1px solid var(--border);padding:10px 0;last-child:border:none">
+        <div style="font-weight:600;font-size:.9rem">${escHtml(n.title)}</div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:3px">${escHtml(n.category)} · ${escHtml(n.date)}</div>
+      </div>`).join('');
+  }
+}
+
+// ══════════════════════════ ATTENDANCE ══════════════════════════
+function initAttDate() {
+  const d = document.getElementById('att-date');
+  if (!d.value) d.value = today();
+}
+
+function addStudent() {
+  const name  = document.getElementById('att-name').value.trim();
+  const roll  = document.getElementById('att-roll').value.trim();
+  const cls   = document.getElementById('att-class').value.trim();
+  if (!name || !roll) { toast('⚠️ Name and Roll Number are required.'); return; }
+  const students = loadData('students', []);
+  if (students.find(s => s.roll === roll)) { toast('⚠️ Roll number already exists.'); return; }
+  students.push({ name, roll, cls });
+  saveData('students', students);
+  document.getElementById('att-name').value = '';
+  document.getElementById('att-roll').value = '';
+  document.getElementById('att-class').value = '';
+  renderAttMark();
+  renderAttSummary();
+  renderDashboard();
+  toast('✅ Student added.');
+}
+
+function renderAttMark() {
+  const students = loadData('students', []);
+  const tbody = document.getElementById('att-mark-body');
+  if (!students.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><p>No students added yet.</p></td></tr>';
+    return;
+  }
+  tbody.innerHTML = students.map((s, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td>${escHtml(s.roll)}</td>
+      <td>${escHtml(s.name)}</td>
+      <td>${escHtml(s.cls)}</td>
+      <td>
+        <div class="att-btns">
+          <button class="btn btn-success btn-sm att-status-btn" data-roll="${escHtml(s.roll)}" data-status="P" onclick="setAttStatus(this)" id="btn-P-${escHtml(s.roll)}">✅ Present</button>
+          <button class="btn btn-danger  btn-sm att-status-btn" data-roll="${escHtml(s.roll)}" data-status="A" onclick="setAttStatus(this)" id="btn-A-${escHtml(s.roll)}">❌ Absent</button>
+          <button class="btn btn-warning btn-sm att-status-btn" data-roll="${escHtml(s.roll)}" data-status="L" onclick="setAttStatus(this)" id="btn-L-${escHtml(s.roll)}">⏰ Late</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+// holds temporary attendance status per roll for current session
+const pendingAtt = {};
+
+function setAttStatus(btn) {
+  const roll   = btn.dataset.roll;
+  const status = btn.dataset.status;
+  pendingAtt[roll] = status;
+  ['P','A','L'].forEach(s => {
+    const b = document.getElementById(`btn-${s}-${roll}`);
+    if (b) b.style.opacity = (s === status) ? '1' : '0.4';
+  });
+}
+
+function markAll(status) {
+  const students = loadData('students', []);
+  students.forEach(s => {
+    pendingAtt[s.roll] = status;
+    ['P','A','L'].forEach(st => {
+      const b = document.getElementById(`btn-${st}-${s.roll}`);
+      if (b) b.style.opacity = (st === status) ? '1' : '0.4';
+    });
+  });
+}
+
+function saveAttendance() {
+  const date    = document.getElementById('att-date').value;
+  const subject = document.getElementById('att-subject').value.trim();
+  if (!date)    { toast('⚠️ Please select a date.'); return; }
+  if (!subject) { toast('⚠️ Please enter a subject / period.'); return; }
+  const students = loadData('students', []);
+  if (!students.length) { toast('⚠️ No students to record attendance for.'); return; }
+  const markedCount = Object.keys(pendingAtt).length;
+  if (!markedCount) { toast('⚠️ Please mark attendance for at least one student.'); return; }
+
+  const records = loadData('attendance-records', []);
+  students.forEach(s => {
+    if (pendingAtt[s.roll]) {
+      // remove old record for same student+date+subject if exists
+      const idx = records.findIndex(r => r.roll === s.roll && r.date === date && r.subject === subject);
+      if (idx > -1) records.splice(idx, 1);
+      records.push({ roll: s.roll, date, subject, status: pendingAtt[s.roll] });
+    }
+  });
+  saveData('attendance-records', records);
+  // reset pending
+  Object.keys(pendingAtt).forEach(k => delete pendingAtt[k]);
+  renderAttMark();
+  renderAttSummary();
+  renderDashboard();
+  toast('✅ Attendance saved.');
+}
+
+function renderAttSummary() {
+  const students = loadData('students', []);
+  const records  = loadData('attendance-records', []);
+  const tbody = document.getElementById('att-summary-body');
+  if (!students.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><p>No students added yet.</p></td></tr>';
+    return;
+  }
+  tbody.innerHTML = students.map(s => {
+    const recs    = records.filter(r => r.roll === s.roll);
+    const present = recs.filter(r => r.status === 'P').length;
+    const total   = recs.length;
+    const pct     = total ? ((present / total) * 100) : 0;
+    const pctStr  = total ? pct.toFixed(1) + '%' : '—';
+    const cls     = pct >= 75 ? '' : (pct >= 60 ? 'warn' : 'low');
+    const w       = total ? pct.toFixed(0) : 0;
+    return `
+      <tr>
+        <td>${escHtml(s.roll)}</td>
+        <td>${escHtml(s.name)}</td>
+        <td>${escHtml(s.cls)}</td>
+        <td>${present}</td>
+        <td>${total}</td>
+        <td>
+          <div class="att-bar"><div class="att-fill ${cls}" style="width:${w}%"></div></div>
+          <div class="att-pct" style="color:${cls === 'low' ? 'var(--danger)' : cls === 'warn' ? 'var(--warning)' : 'var(--success)'}">${pctStr}</div>
+        </td>
+        <td><button class="btn btn-danger btn-sm" onclick="removeStudent('${escHtml(s.roll)}')">🗑 Remove</button></td>
+      </tr>`;
+  }).join('');
+}
+
+function removeStudent(roll) {
+  if (!confirm('Remove student and all their records?')) return;
+  let students = loadData('students', []);
+  students = students.filter(s => s.roll !== roll);
+  saveData('students', students);
+  let records = loadData('attendance-records', []);
+  records = records.filter(r => r.roll !== roll);
+  saveData('attendance-records', records);
+  renderAttMark();
+  renderAttSummary();
+  renderDashboard();
+  toast('🗑 Student removed.');
+}
+
+// ══════════════════════════ TIMETABLE ══════════════════════════
+const TT_DAYS    = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const TT_PERIODS = ['8:00–9:00','9:00–10:00','10:00–11:00','11:00–12:00','12:00–1:00','1:00–2:00','2:00–3:00','3:00–4:00'];
+let ttEditKey = null; // "day|period"
+
+function addTTClass() {
+  const name = prompt('Enter class / section name (e.g. FY BSc CS - A):');
+  if (!name || !name.trim()) return;
+  const classes = loadData('tt-classes', []);
+  if (classes.includes(name.trim())) { toast('⚠️ Class already exists.'); return; }
+  classes.push(name.trim());
+  saveData('tt-classes', classes);
+  renderTTClassSel();
+  document.getElementById('tt-class-sel').value = name.trim();
+  renderTimetable();
+  toast('✅ Class added.');
+}
+
+function renderTTClassSel() {
+  const sel = document.getElementById('tt-class-sel');
+  const cur = sel.value;
+  const classes = loadData('tt-classes', []);
+  sel.innerHTML = '<option value="">— Select Class —</option>' +
+    classes.map(c => `<option value="${escHtml(c)}" ${c === cur ? 'selected' : ''}>${escHtml(c)}</option>`).join('');
+}
+
+function renderTimetable() {
+  const cls = document.getElementById('tt-class-sel').value;
+  const card = document.getElementById('tt-card');
+  if (!cls) {
+    card.innerHTML = '<div class="empty-state"><div class="es-icon">🗓️</div><p>Select or create a class to view its timetable.</p></div>';
+    return;
+  }
+  const data = loadData('timetable-' + cls, {});
+  let html = '<div class="tt-grid">';
+  // header row
+  html += '<div class="tt-head" style="background:transparent"></div>';
+  TT_DAYS.forEach(d => { html += `<div class="tt-head">${d}</div>`; });
+  // period rows
+  TT_PERIODS.forEach(period => {
+    html += `<div class="tt-time">${period}</div>`;
+    TT_DAYS.forEach(day => {
+      const key   = day + '|' + period;
+      const slot  = data[key];
+      if (slot && slot.subject) {
+        html += `<div class="tt-cell filled" onclick="openTTModal('${escHtml(cls)}','${escHtml(day)}','${escHtml(period)}')">
+          <span class="tt-del" onclick="event.stopPropagation();deleteTTSlot('${escHtml(cls)}','${escHtml(day)}','${escHtml(period)}')">✕</span>
+          <div class="tt-subj">${escHtml(slot.subject)}</div>
+          <div class="tt-teacher">${escHtml(slot.teacher || '')}</div>
+          <div class="tt-room">${escHtml(slot.room || '')}</div>
+        </div>`;
+      } else {
+        html += `<div class="tt-cell" onclick="openTTModal('${escHtml(cls)}','${escHtml(day)}','${escHtml(period)}')">
+          <div style="color:var(--border);font-size:.75rem;margin-top:16px;text-align:center">+ Add</div>
+        </div>`;
       }
-    }
+    });
+  });
+  html += '</div>';
+  card.innerHTML = html;
+}
 
-    function checkNotifications() {
-      if ('Notification' in window && Notification.permission === 'granted') {
-        const now = new Date();
-        const assignments = JSON.parse(localStorage.getItem('assignments') || '[]');
+function openTTModal(cls, day, period) {
+  ttEditKey = { cls, day, period };
+  const data = loadData('timetable-' + cls, {});
+  const slot = data[day + '|' + period] || {};
+  document.getElementById('tt-subj').value    = slot.subject || '';
+  document.getElementById('tt-teacher').value = slot.teacher || '';
+  document.getElementById('tt-room').value    = slot.room    || '';
+  document.getElementById('ttModal').classList.add('open');
+  document.getElementById('tt-subj').focus();
+}
 
-        assignments.forEach(item => {
-          const dueDateTime = new Date(item.date + 'T' + item.time);
-          const diffDays = Math.floor((dueDateTime - now) / (1000 * 60 * 60 * 24));
+function closeTTModal() {
+  document.getElementById('ttModal').classList.remove('open');
+  ttEditKey = null;
+}
 
-          if (diffDays === 0) {
-            notify("Due Today", ${item.title} is due today at ${formatTo12Hour(item.time)}!);
-          } else if (diffDays === 1) {
-            notify("Due Tomorrow", ${item.title} is due tomorrow at ${formatTo12Hour(item.time)}!);
-          }
-        });
-      }
-    }
+function saveTTSlot() {
+  if (!ttEditKey) return;
+  const subject = document.getElementById('tt-subj').value.trim();
+  const teacher = document.getElementById('tt-teacher').value.trim();
+  const room    = document.getElementById('tt-room').value.trim();
+  if (!subject) { toast('⚠️ Subject name is required.'); return; }
+  const { cls, day, period } = ttEditKey;
+  const data = loadData('timetable-' + cls, {});
+  data[day + '|' + period] = { subject, teacher, room };
+  saveData('timetable-' + cls, data);
+  closeTTModal();
+  renderTimetable();
+  toast('✅ Timetable updated.');
+}
 
-    function notify(title, body) {
-      new Notification(title, { body });
-    }
+function deleteTTSlot(cls, day, period) {
+  const data = loadData('timetable-' + cls, {});
+  delete data[day + '|' + period];
+  saveData('timetable-' + cls, data);
+  renderTimetable();
+  toast('🗑 Slot cleared.');
+}
 
-    function addToCalendar(title, date, time) {
-      const [hour, minute] = time.split(':');
-      const start = new Date(date);
-      start.setHours(parseInt(hour));
-      start.setMinutes(parseInt(minute));
+// ══════════════════════════ RESULTS ══════════════════════════
+function getGrade(pct) {
+  if (pct >= 90) return 'O';
+  if (pct >= 75) return 'A';
+  if (pct >= 60) return 'B';
+  if (pct >= 50) return 'C';
+  if (pct >= 40) return 'D';
+  return 'F';
+}
+function gradeClass(g) {
+  if (g === 'O' || g === 'A') return 'grade-A';
+  if (g === 'B') return 'grade-B';
+  if (g === 'C' || g === 'D') return 'grade-C';
+  return 'grade-F';
+}
 
-      const end = new Date(start.getTime() + 60 * 60 * 1000);
+function addResult() {
+  const roll  = document.getElementById('res-roll').value.trim();
+  const name  = document.getElementById('res-name').value.trim();
+  const subj  = document.getElementById('res-subj').value.trim();
+  const exam  = document.getElementById('res-exam').value;
+  const marks = parseFloat(document.getElementById('res-marks').value);
+  const total = parseFloat(document.getElementById('res-total').value);
 
-      const format = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  if (!roll || !name || !subj) { toast('⚠️ Roll No., Name, and Subject are required.'); return; }
+  if (isNaN(marks) || isNaN(total) || total <= 0) { toast('⚠️ Enter valid marks and total.'); return; }
+  if (marks > total) { toast('⚠️ Marks cannot exceed total marks.'); return; }
 
-      const url = https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${format(start)}/${format(end)}&details=${encodeURIComponent(title)}&sf=true&output=xml;
+  const results = loadData('results', []);
+  results.push({ id: Date.now(), roll, name, subj, exam, marks, total, date: today() });
+  saveData('results', results);
+  ['res-roll','res-name','res-subj','res-marks','res-total'].forEach(id =>
+    { document.getElementById(id).value = ''; });
+  renderResults();
+  renderDashboard();
+  toast('✅ Result saved.');
+}
 
-      window.open(url, '_blank');
-    }
+function renderResults() {
+  const results    = loadData('results', []);
+  const filterRoll = document.getElementById('res-filter-roll').value.trim().toLowerCase();
+  const filterSubj = document.getElementById('res-filter-subj').value.trim().toLowerCase();
+  const tbody = document.getElementById('results-body');
 
-    function checkLastHourNotifications() {
-      if ('Notification' in window && Notification.permission === 'granted') {
-        const now = new Date();
-        const assignments = JSON.parse(localStorage.getItem('assignments') || '[]');
+  const filtered = results.filter(r =>
+    (!filterRoll || r.roll.toLowerCase().includes(filterRoll)) &&
+    (!filterSubj || r.subj.toLowerCase().includes(filterSubj))
+  );
 
-        assignments.forEach(item => {
-          const due = new Date(item.date + 'T' + item.time);
-          const diff = due - now;
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="10" class="empty-state"><p>No results found.</p></td></tr>';
+    return;
+  }
+  tbody.innerHTML = filtered.map((r, i) => {
+    const pct   = ((r.marks / r.total) * 100).toFixed(1);
+    const grade = getGrade(parseFloat(pct));
+    const gc    = gradeClass(grade);
+    const pass  = grade !== 'F';
+    return `
+      <tr>
+        <td>${escHtml(r.roll)}</td>
+        <td>${escHtml(r.name)}</td>
+        <td>${escHtml(r.subj)}</td>
+        <td>${escHtml(r.exam)}</td>
+        <td>${escHtml(String(r.marks))}</td>
+        <td>${escHtml(String(r.total))}</td>
+        <td>${pct}%</td>
+        <td class="${gc}">${grade}</td>
+        <td><span class="badge ${pass ? 'badge-success' : 'badge-danger'}">${pass ? 'Pass' : 'Fail'}</span></td>
+        <td><button class="btn btn-danger btn-sm" onclick="removeResult(${r.id})">🗑</button></td>
+      </tr>`;
+  }).join('');
+}
 
-          const minutesLeft = Math.floor(diff / (1000 * 60));
-          if (minutesLeft > 0 && minutesLeft <= 60) {
-            const messages = [
-              "⏰ Tick tock! Only {time} left. Panic now or start working?",
-              "📚 Your assignment is due in {time}. Procrastination level: Expert?",
-              "😅 {time} left! Time to pretend you're productive.",
-              "🧠 Brain loading... only {time} remaining!",
-              "🔥 Pressure makes diamonds... and missed deadlines. {time} to go!"
-            ];
-            const randomMsg = messages[Math.floor(Math.random() * messages.length)];
-            notify("Last Hour Reminder", randomMsg.replace("{time}", minutesLeft + " minutes"));
-          }
-        });
-      }
-    }
-  </script>
+function clearResFilters() {
+  document.getElementById('res-filter-roll').value = '';
+  document.getElementById('res-filter-subj').value = '';
+  renderResults();
+}
+
+function removeResult(id) {
+  let results = loadData('results', []);
+  results = results.filter(r => r.id !== id);
+  saveData('results', results);
+  renderResults();
+  renderDashboard();
+  toast('🗑 Result removed.');
+}
+
+// ══════════════════════════ PAYMENT ══════════════════════════
+function addPayment() {
+  const name   = document.getElementById('pay-name').value.trim();
+  const roll   = document.getElementById('pay-roll').value.trim();
+  const type   = document.getElementById('pay-type').value;
+  const amount = parseFloat(document.getElementById('pay-amount').value);
+  const due    = document.getElementById('pay-due').value;
+  const status = document.getElementById('pay-status').value;
+
+  if (!name || !roll) { toast('⚠️ Name and Roll Number are required.'); return; }
+  if (isNaN(amount) || amount <= 0) { toast('⚠️ Enter a valid amount.'); return; }
+  if (!due) { toast('⚠️ Please select a due date.'); return; }
+
+  const payments = loadData('payments', []);
+  payments.push({ id: Date.now(), name, roll, type, amount, due, status, date: today() });
+  saveData('payments', payments);
+  ['pay-name','pay-roll','pay-amount'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('pay-due').value = '';
+  document.getElementById('pay-status').value = 'Pending';
+  renderPayments();
+  renderPaySummary();
+  renderDashboard();
+  toast('✅ Fee record added.');
+}
+
+function renderPaySummary() {
+  const payments = loadData('payments', []);
+  const total   = payments.reduce((s, p) => s + p.amount, 0);
+  const paid    = payments.filter(p => p.status === 'Paid').reduce((s, p) => s + p.amount, 0);
+  const pending = payments.filter(p => p.status === 'Pending').reduce((s, p) => s + p.amount, 0);
+  const partial = payments.filter(p => p.status === 'Partial').reduce((s, p) => s + p.amount, 0);
+
+  const fmt = n => '₹' + n.toLocaleString('en-IN');
+  document.getElementById('pay-summary-row').innerHTML = `
+    <div class="pay-sum-item">
+      <div class="psi-label">Total Fees</div>
+      <div class="psi-val" style="color:var(--primary)">${fmt(total)}</div>
+    </div>
+    <div class="pay-sum-item">
+      <div class="psi-label">Collected</div>
+      <div class="psi-val" style="color:var(--success)">${fmt(paid)}</div>
+    </div>
+    <div class="pay-sum-item">
+      <div class="psi-label">Pending</div>
+      <div class="psi-val" style="color:var(--danger)">${fmt(pending)}</div>
+    </div>
+    <div class="pay-sum-item">
+      <div class="psi-label">Partial</div>
+      <div class="psi-val" style="color:var(--warning)">${fmt(partial)}</div>
+    </div>
+    <div class="pay-sum-item">
+      <div class="psi-label">Collection Rate</div>
+      <div class="psi-val" style="color:var(--primary)">${total ? ((paid/total)*100).toFixed(1)+'%' : '—'}</div>
+    </div>`;
+}
+
+function renderPayments() {
+  const payments     = loadData('payments', []);
+  const filterText   = document.getElementById('pay-filter').value.trim().toLowerCase();
+  const filterStatus = document.getElementById('pay-filter-status').value;
+  const tbody = document.getElementById('payment-body');
+
+  const filtered = payments.filter(p =>
+    (!filterText   || p.name.toLowerCase().includes(filterText) || p.roll.toLowerCase().includes(filterText)) &&
+    (!filterStatus || p.status === filterStatus)
+  );
+
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="8" class="empty-state"><p>No records found.</p></td></tr>';
+    return;
+  }
+
+  const now = new Date(); now.setHours(0,0,0,0);
+  tbody.innerHTML = filtered.map((p, i) => {
+    const due   = new Date(p.due);
+    const overdue = p.status !== 'Paid' && due < now;
+    const statusBadge = p.status === 'Paid'
+      ? '<span class="badge badge-success">Paid</span>'
+      : p.status === 'Partial'
+        ? '<span class="badge badge-warning">Partial</span>'
+        : overdue
+          ? '<span class="badge badge-danger">Overdue</span>'
+          : '<span class="badge badge-info">Pending</span>';
+    return `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${escHtml(p.roll)}</td>
+        <td>${escHtml(p.name)}</td>
+        <td>${escHtml(p.type)}</td>
+        <td>₹${Number(p.amount).toLocaleString('en-IN')}</td>
+        <td style="${overdue ? 'color:var(--danger);font-weight:600' : ''}">${escHtml(p.due)}</td>
+        <td>${statusBadge}</td>
+        <td style="display:flex;gap:4px;flex-wrap:wrap">
+          ${p.status !== 'Paid' ? `<button class="btn btn-success btn-sm" onclick="markPaid(${p.id})">✅ Paid</button>` : ''}
+          <button class="btn btn-danger btn-sm" onclick="removePayment(${p.id})">🗑</button>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+function markPaid(id) {
+  const payments = loadData('payments', []);
+  const rec = payments.find(p => p.id === id);
+  if (rec) rec.status = 'Paid';
+  saveData('payments', payments);
+  renderPayments();
+  renderPaySummary();
+  renderDashboard();
+  toast('✅ Marked as Paid.');
+}
+
+function removePayment(id) {
+  let payments = loadData('payments', []);
+  payments = payments.filter(p => p.id !== id);
+  saveData('payments', payments);
+  renderPayments();
+  renderPaySummary();
+  renderDashboard();
+  toast('🗑 Record removed.');
+}
+
+// ══════════════════════════ NOTICES ══════════════════════════
+const CAT_COLORS = {
+  General:'badge-info', Exam:'badge-danger', Event:'badge-success',
+  Holiday:'badge-warning', Fee:'badge-muted', Result:'badge-info', Urgent:'badge-danger'
+};
+
+function addNotice() {
+  const title = document.getElementById('notice-title').value.trim();
+  const cat   = document.getElementById('notice-cat').value;
+  const body  = document.getElementById('notice-body').value.trim();
+  if (!title || !body) { toast('⚠️ Title and content are required.'); return; }
+  const notices = loadData('notices', []);
+  notices.unshift({ title, category: cat, body, date: today(), id: Date.now() });
+  saveData('notices', notices);
+  document.getElementById('notice-title').value = '';
+  document.getElementById('notice-body').value  = '';
+  renderNotices();
+  renderDashboard();
+  toast('📢 Notice posted.');
+}
+
+function renderNotices() {
+  const notices = loadData('notices', []);
+  const search  = document.getElementById('notice-search').value.trim().toLowerCase();
+  const filterCat = document.getElementById('notice-filter-cat').value;
+
+  const filtered = notices.filter(n =>
+    (!search    || n.title.toLowerCase().includes(search) || n.body.toLowerCase().includes(search)) &&
+    (!filterCat || n.category === filterCat)
+  );
+
+  const container = document.getElementById('notices-list');
+  if (!filtered.length) {
+    container.innerHTML = '<div class="empty-state"><div class="es-icon">📋</div><p>No notices found.</p></div>';
+    return;
+  }
+  container.innerHTML = filtered.map(n => `
+    <div class="notice-card">
+      <span class="notice-del" onclick="removeNotice(${n.id})">✕ Remove</span>
+      <div class="notice-meta">
+        <span class="badge ${CAT_COLORS[n.category] || 'badge-info'}">${escHtml(n.category)}</span>
+        <span style="font-size:.78rem;color:var(--muted)">📅 ${escHtml(n.date)}</span>
+      </div>
+      <div class="notice-title">${escHtml(n.title)}</div>
+      <div class="notice-body" style="margin-top:6px">${escHtml(n.body)}</div>
+    </div>`).join('');
+}
+
+function removeNotice(id) {
+  let notices = loadData('notices', []);
+  notices = notices.filter(n => n.id !== id);
+  saveData('notices', notices);
+  renderNotices();
+  renderDashboard();
+  toast('🗑 Notice removed.');
+}
+
+// ══════════════════════════ INIT ══════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  // Set date in header
+  const d = new Date();
+  document.getElementById('headerDate').textContent =
+    d.toLocaleDateString('en-IN', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+  // Greeting
+  const h = d.getHours();
+  const greet = h < 12 ? 'Good Morning' : h < 17 ? 'Good Afternoon' : 'Good Evening';
+  const ge = document.getElementById('dashGreet');
+  if (ge) ge.textContent = greet + ' 👋';
+
+  // Close modal on overlay click
+  document.getElementById('ttModal').addEventListener('click', function(e) {
+    if (e.target === this) closeTTModal();
+  });
+
+  renderDashboard();
+  renderPaySummary();
+});
+</script>
 </body>
 </html>
